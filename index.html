@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora ROI de Automatización</title>
+  <style>
+    :root {
+      --cost-bg: #ffe8e6;
+      --benefit-bg: #e8f6ec;
+      --period-bg: #e7f1ff;
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      --radius: 14px;
+      --text: #1c1c1c;
+      --muted: #5f6a86;
+      --accent: #2d8cff;
+      --border: #d9e2f5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      background: radial-gradient(circle at 20% 20%, #f4f8ff, #eef2fb 45%, #e9ecf7 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 32px 18px 54px;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .header {
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -0.4px;
+      color: #121826;
+    }
+
+    .header p {
+      margin: 6px 0 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .grid {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .column {
+      flex: 1 1 320px;
+      min-width: 0;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--border);
+    }
+
+    .card h2 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      letter-spacing: -0.2px;
+    }
+
+    .tint-costs {
+      background: var(--cost-bg);
+    }
+
+    .tint-benefits {
+      background: var(--benefit-bg);
+    }
+
+    .tint-period {
+      background: var(--period-bg);
+    }
+
+    .fields {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #1f2a3d;
+      font-size: 13px;
+      letter-spacing: -0.1px;
+    }
+
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #cfd6e6;
+      border-radius: 10px;
+      font-size: 14px;
+      background: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(45, 140, 255, 0.15);
+    }
+
+    .period-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .period-row label {
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .results {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .results h3 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .summary {
+      font-weight: 700;
+      color: #0f172a;
+      padding: 12px;
+      border-radius: 10px;
+      background: #f7f9ff;
+      border: 1px dashed #c7d4f3;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px 16px;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #f6f8fc;
+      border: 1px solid #e3e9f7;
+      font-size: 14px;
+    }
+
+    .result-item span:first-child {
+      color: var(--muted);
+      margin-right: 10px;
+    }
+
+    .roi {
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .positive {
+      color: #188351;
+    }
+
+    .negative {
+      color: #d13a3a;
+    }
+
+    @media (max-width: 820px) {
+      .grid {
+        flex-direction: column;
+      }
+      .period-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      body {
+        padding: 20px 14px 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>Calculadora de ROI para Automatización</h1>
+      <p>Estime rápidamente la rentabilidad de su proyecto con costos, beneficios y período de análisis.</p>
+    </div>
+
+    <div class="grid">
+      <div class="column">
+        <div class="card tint-costs">
+          <h2>Costos de Inversión</h2>
+          <div class="fields">
+            <div>
+              <label for="c-adq">Adquisición de herramientas de automatización</label>
+              <input type="number" id="c-adq" value="5000" min="0">
+            </div>
+            <div>
+              <label for="c-cons">Consultoría o soporte externo</label>
+              <input type="number" id="c-cons" value="2000" min="0">
+            </div>
+            <div>
+              <label for="c-cap">Capacitación del personal</label>
+              <input type="number" id="c-cap" value="1500" min="0">
+            </div>
+            <div>
+              <label for="c-impl">Costos de implementación</label>
+              <input type="number" id="c-impl" value="1000" min="0">
+            </div>
+            <div>
+              <label for="c-mant">Mantenimiento y soporte anual</label>
+              <input type="number" id="c-mant" value="500" min="0">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="card tint-benefits">
+          <h2>Beneficios Anuales</h2>
+          <div class="fields">
+            <div>
+              <label for="b-tiempo">Tiempo laboral ahorrado (valor monetario)</label>
+              <input type="number" id="b-tiempo" value="8000" min="0">
+            </div>
+            <div>
+              <label for="b-errores">Reducción de errores y retrabajo</label>
+              <input type="number" id="b-errores" value="3000" min="0">
+            </div>
+            <div>
+              <label for="b-prod">Aumento de productividad</label>
+              <input type="number" id="b-prod" value="2500" min="0">
+            </div>
+            <div>
+              <label for="b-costos">Costos operativos evitados</label>
+              <input type="number" id="b-costos" value="1500" min="0">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card tint-period">
+      <h2>Período de Análisis</h2>
+      <div class="period-row">
+        <label for="periodo">Proyección a:</label>
+        <select id="periodo">
+          <option value="1">1 año</option>
+          <option value="2" selected>2 años</option>
+          <option value="3">3 años</option>
+          <option value="4">4 años</option>
+          <option value="5">5 años</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="results">
+      <h3>Resultados del análisis</h3>
+      <div class="summary" id="conclusion">Conclusión: El proyecto es rentable en el período analizado.</div>
+      <div class="result-grid">
+        <div class="result-item">
+          <span>Total costos iniciales</span>
+          <span id="total-inicial">$ 0</span>
+        </div>
+        <div class="result-item">
+          <span>Costos de mantención proyectados</span>
+          <span id="mant-proy">$ 0</span>
+        </div>
+        <div class="result-item">
+          <span>Total costos del proyecto</span>
+          <span id="total-proyecto">$ 0</span>
+        </div>
+        <div class="result-item">
+          <span>Beneficios anuales totales</span>
+          <span id="benef-anual">$ 0</span>
+        </div>
+        <div class="result-item">
+          <span>Beneficios totales proyectados</span>
+          <span id="benef-proy">$ 0</span>
+        </div>
+        <div class="result-item">
+          <span>Beneficio neto</span>
+          <span id="benef-neto">$ 0</span>
+        </div>
+        <div class="result-item">
+          <span>ROI del proyecto (%)</span>
+          <span class="roi" id="roi">0.0%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const inputs = document.querySelectorAll('input[type="number"], select');
+    const formatCurrency = (value) =>
+      '$ ' + new Intl.NumberFormat('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+    const formatROI = (value) =>
+      new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value) + '%';
+
+    const getValue = (id) => {
+      const val = parseFloat(document.getElementById(id).value);
+      return isNaN(val) || val < 0 ? 0 : val;
+    };
+
+    const recalc = () => {
+      // Capturar valores de costos
+      const C_adq = getValue('c-adq');
+      const C_cons = getValue('c-cons');
+      const C_cap = getValue('c-cap');
+      const C_impl = getValue('c-impl');
+      const C_mant = getValue('c-mant');
+
+      // Capturar valores de beneficios
+      const B_tiempo = getValue('b-tiempo');
+      const B_errores = getValue('b-errores');
+      const B_prod = getValue('b-prod');
+      const B_costos = getValue('b-costos');
+
+      // Años de proyección
+      const n = parseInt(document.getElementById('periodo').value, 10) || 0;
+
+      // Cálculos de costos
+      // Total de costos iniciales
+      const totalInicial = C_adq + C_cons + C_cap + C_impl;
+      // Costos de mantención proyectados
+      const mantProyectados = C_mant * n;
+      // Costos totales del proyecto
+      const totalProyecto = totalInicial + mantProyectados;
+
+      // Cálculos de beneficios
+      // Beneficios anuales totales
+      const benefAnual = B_tiempo + B_errores + B_prod + B_costos;
+      // Beneficios totales proyectados
+      const benefProyectados = benefAnual * n;
+
+      // Beneficio neto
+      const benefNeto = benefProyectados - totalProyecto;
+      // ROI porcentual
+      const roi = totalProyecto === 0 ? 0 : (benefNeto / totalProyecto) * 100;
+
+      // Render de resultados
+      document.getElementById('total-inicial').textContent = formatCurrency(totalInicial);
+      document.getElementById('mant-proy').textContent = formatCurrency(mantProyectados);
+      document.getElementById('total-proyecto').textContent = formatCurrency(totalProyecto);
+      document.getElementById('benef-anual').textContent = formatCurrency(benefAnual);
+      document.getElementById('benef-proy').textContent = formatCurrency(benefProyectados);
+      document.getElementById('benef-neto').textContent = formatCurrency(benefNeto);
+
+      const roiEl = document.getElementById('roi');
+      roiEl.textContent = formatROI(roi);
+      roiEl.classList.remove('positive', 'negative');
+      roiEl.classList.add(roi >= 0 ? 'positive' : 'negative');
+
+      const conclusionEl = document.getElementById('conclusion');
+      if (roi >= 0) {
+        conclusionEl.textContent = 'Conclusión: El proyecto es rentable en el período analizado.';
+        conclusionEl.style.color = '#0f5132';
+      } else {
+        conclusionEl.textContent = 'Conclusión: El proyecto NO es rentable en el período analizado.';
+        conclusionEl.style.color = '#842029';
+      }
+    };
+
+    inputs.forEach((el) => {
+      el.addEventListener('input', recalc);
+      el.addEventListener('change', recalc);
+    });
+
+    recalc();
+  </script>
+</body>
+</html>
